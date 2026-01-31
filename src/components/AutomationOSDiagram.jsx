@@ -495,6 +495,33 @@ const nodes = [
   },
 ];
 
+// Calculate the bounds of all nodes to determine the default pan position
+// Node rendering offsets: x: -100 (node rect starts 100px left of node.x), y: -40 (starts 40px above node.y)
+const NODE_OFFSET_X = -100;
+const NODE_OFFSET_Y = -40;
+
+function getCanvasBounds(nodesList) {
+  if (nodesList.length === 0) return { minX: 0, minY: 0 };
+
+  const minX = Math.min(...nodesList.map(n => n.x + NODE_OFFSET_X));
+  const minY = Math.min(...nodesList.map(n => n.y + NODE_OFFSET_Y));
+
+  return { minX, minY };
+}
+
+// Calculate default pan to position top-left of canvas content just below the title
+// Target screen position: x: 30 (left margin), y: 110 (below title)
+const INITIAL_SCREEN_X = 30;
+const INITIAL_SCREEN_Y = 110;
+
+function getDefaultPan(nodesList) {
+  const { minX, minY } = getCanvasBounds(nodesList);
+  return {
+    x: INITIAL_SCREEN_X - minX,
+    y: INITIAL_SCREEN_Y - minY,
+  };
+}
+
 // Container definition for DOC-IA
 const containers = [
   {
@@ -1295,7 +1322,9 @@ const DetailPanel = ({ node, onClose }) => {
 
 export default function AutomationOSDiagram() {
   const [selectedNode, setSelectedNode] = useState(null);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  // Calculate default pan dynamically based on node positions
+  const defaultPan = getDefaultPan(nodes);
+  const [pan, setPan] = useState(defaultPan);
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
@@ -1344,7 +1373,7 @@ export default function AutomationOSDiagram() {
   }, []);
 
   const handleResetView = useCallback(() => {
-    setPan({ x: 0, y: 0 });
+    setPan(defaultPan);
     setZoom(1);
   }, []);
 
@@ -1383,6 +1412,8 @@ export default function AutomationOSDiagram() {
         top: '20px',
         left: '20px',
         fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
+        zIndex: 20,
+        pointerEvents: 'none',
       }}>
         <div style={{
           fontSize: '10px',
