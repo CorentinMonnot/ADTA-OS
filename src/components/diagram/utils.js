@@ -12,10 +12,12 @@ export function getCanvasBounds(nodesList) {
   return { minX, minY };
 }
 
-export function getDefaultPan(nodesList) {
+export function getDefaultPan(nodesList, zoom = 1) {
   const { minX, minY } = getCanvasBounds(nodesList);
+  // Account for zoom: screenPos = nodePos * zoom + pan
+  // So: pan = screenPos - nodePos * zoom
   return {
-    x: INITIAL_SCREEN_X - minX,
-    y: INITIAL_SCREEN_Y - minY,
+    x: INITIAL_SCREEN_X - minX * zoom,
+    y: INITIAL_SCREEN_Y - minY * zoom,
   };
 }

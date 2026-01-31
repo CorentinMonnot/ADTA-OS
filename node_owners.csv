@@ -1,0 +1,25 @@
+node;owner
+Configuration Matrix;Engineering
+PM Top Level;Project Management
+Config Driver;Engineering
+Config BOM - SE;Engineering
+Config BOM - ME;Engineering
+Config BOM - EE;Engineering
+Config BOM - PM;Engineering
+Program Master BOM;Engineering
+IRP;Project Management, Material Management, Procurement
+Purchase Requisitions;Project Management
+Master Proc Tracker;Procurement
+Master Receiving List;Ops
+Procurement;Procurement
+Acumatica;Procurement
+Vendor Cadence;Sub-Contracts Management
+Vendor Shipping Schedule;Sub-Contracts Management
+Internal High Level Schedule;Project Management, Sub-Contracts Management
+Logistics Pickup Schedule;Project Management, Sub-Contracts Management
+BOM Cost;Project Management, Procurement
+Material Reconciliation;Project Management, Material Management, Procurement
+Asset Tag Master;Project Management
+Material List Generator;Project Management, Material Management
+Finger Material List;Ops
+Work Orders & Pick List;Ops

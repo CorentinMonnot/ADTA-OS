@@ -1,18 +1,21 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { nodes } from './data/nodes';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
+import { nodes, ownerColors } from './data/nodes';
 import { connections } from './data/connections';
 import { containers } from './data/containers';
 import { getDefaultPan } from './utils';
+import { getGradientId, getUniqueOwnerCombinations } from './data/ownerConfig';
 import Container from './Container';
 import Node from './Node';
 import Connection from './Connection';
 import DetailPanel from './DetailPanel';
 
+const INITIAL_ZOOM = 0.8;
+
 export default function AutomationOSDiagram() {
   const [selectedNode, setSelectedNode] = useState(null);
-  const defaultPan = getDefaultPan(nodes);
+  const defaultPan = getDefaultPan(nodes, INITIAL_ZOOM);
   const [pan, setPan] = useState(defaultPan);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const lastTouchDistance = useRef(null);
@@ -75,7 +78,7 @@ export default function AutomationOSDiagram() {
 
   const handleResetView = useCallback(() => {
     setPan(defaultPan);
-    setZoom(1);
+    setZoom(INITIAL_ZOOM);
   }, [defaultPan]);
 
   const handleTouchStart = useCallback((e) => {
@@ -142,6 +145,17 @@ export default function AutomationOSDiagram() {
 
   const selectedNodeData = nodes.find(n => n.id === selectedNode);
 
+  // Calculate screen position for the detail panel
+  const selectedNodePosition = useMemo(() => {
+    if (!selectedNodeData) return null;
+    return {
+      x: selectedNodeData.x * zoom + pan.x,
+      y: selectedNodeData.y * zoom + pan.y,
+      width: 220 * zoom,
+      height: 80 * zoom
+    };
+  }, [selectedNodeData, zoom, pan]);
+
   return (
     <div style={{
       width: '100%',
@@ -206,7 +220,7 @@ export default function AutomationOSDiagram() {
       {/* Zoom Controls */}
       <div style={{
         position: 'absolute',
-        bottom: '20px',
+        bottom: '40px',
         left: '20px',
         display: 'flex',
         flexDirection: 'column',
@@ -309,10 +323,29 @@ export default function AutomationOSDiagram() {
           `}
         </style>
 
+        {/* Gradient definitions for multi-owner nodes */}
+        <defs>
+          {getUniqueOwnerCombinations(nodes).map(owners => {
+            const gradientId = getGradientId(owners);
+            const colors = owners.map(o => ownerColors[o]);
+            return (
+              <linearGradient key={gradientId} id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+                {colors.map((color, i) => (
+                  <stop
+                    key={i}
+                    offset={`${(i / (colors.length - 1)) * 100}%`}
+                    stopColor={color}
+                  />
+                ))}
+              </linearGradient>
+            );
+          })}
+        </defs>
+
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
           {/* Containers (render first, behind everything) */}
           {containers.map(container => (
-            <Container key={container.id} container={container} />
+            <Container key={container.id} container={container} nodes={nodes} />
           ))}
 
           {/* Connections */}
@@ -340,7 +373,36 @@ export default function AutomationOSDiagram() {
         </g>
       </svg>
 
-      {/* Legend */}
+      {/* Owner Legend - Top Right */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        background: 'rgba(13, 13, 26, 0.95)',
+        border: '1px solid #3d3d5c',
+        borderRadius: '8px',
+        padding: '12px 16px',
+        fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
+        fontSize: '11px',
+        zIndex: 20,
+      }}>
+        <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Owners</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {Object.entries(ownerColors).map(([owner, color]) => (
+            <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '2px',
+                backgroundColor: color,
+              }} />
+              <span style={{ color: '#aaa' }}>{owner}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Connection Type Legend - Bottom */}
       <div style={{
         position: 'absolute',
         bottom: '0',
@@ -349,7 +411,7 @@ export default function AutomationOSDiagram() {
         display: 'flex',
         justifyContent: 'center',
         gap: '32px',
-        padding: '8px 20px',
+        padding: '12px 20px',
         background: 'rgba(13, 13, 26, 0.95)',
         borderTop: '1px solid #3d3d5c',
         fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
@@ -396,6 +458,7 @@ export default function AutomationOSDiagram() {
       {/* Detail panel */}
       <DetailPanel
         node={selectedNodeData}
+        position={selectedNodePosition}
         onClose={() => setSelectedNode(null)}
       />
     </div>

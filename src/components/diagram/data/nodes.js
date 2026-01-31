@@ -1,14 +1,16 @@
+import { ownerColors, getNodeFill, getPrimaryColor } from './ownerConfig';
+
 export const NODE_OFFSET_X = -100;
 export const NODE_OFFSET_Y = -40;
 
-export const nodes = [
+const nodeData = [
   {
     id: 'config-matrix',
     label: 'Configuration Matrix',
     subtitle: 'Single Source of Truth',
     x: 200,
     y: 580,
-    color: '#00D4AA',
+    owners: ['Engineering'],
     questions: [
       'What sub-assemblies make up each product?',
       'What is the SE/ME/EE/PM configuration?',
@@ -28,7 +30,7 @@ export const nodes = [
     subtitle: 'System Definitions',
     x: 200,
     y: 120,
-    color: '#FF6B35',
+    owners: ['Project Management'],
     questions: [
       'What is the system code?',
       'Where does it ship to?',
@@ -43,14 +45,13 @@ export const nodes = [
   {
     id: 'config-driver',
     label: 'Config Driver',
-    subtitle: 'Flattened Aggregation',
+    subtitle: 'Ship-level Aggregation',
     x: 500,
     y: 230,
-    color: '#9D4EDD',
+    owners: ['Engineering'],
     questions: [
-      'How many of each part are needed total?',
-      'What is the aggregated count per sub-assembly?',
-      'What does the flattened BOM look like?',
+      'How many of each are needed for the program?',
+      'What does the agregated discipline BOMs look like?',
     ],
     details: {
       source: 'Extracts from Configuration Matrix',
@@ -67,7 +68,7 @@ export const nodes = [
     subtitle: 'Systems Engineering',
     x: 800,
     y: 140,
-    color: '#00B4D8',
+    owners: ['Engineering'],
     questions: [
       'What SE parts/sub-assy are needed for this project?',
       'What are the SE quantities per system?',
@@ -85,7 +86,7 @@ export const nodes = [
     subtitle: 'Mechanical Engineering',
     x: 800,
     y: 230,
-    color: '#00B4D8',
+    owners: ['Engineering'],
     questions: [
       'What ME parts/sub-assy are needed for this project?',
       'What are the ME quantities per system?',
@@ -103,7 +104,7 @@ export const nodes = [
     subtitle: 'Electrical Engineering',
     x: 800,
     y: 320,
-    color: '#00B4D8',
+    owners: ['Engineering'],
     questions: [
       'What EE parts/sub-assy are needed for this project?',
       'What are the EE quantities per system?',
@@ -121,7 +122,7 @@ export const nodes = [
     subtitle: 'Program Management',
     x: 800,
     y: 410,
-    color: '#00B4D8',
+    owners: ['Engineering'],
     questions: [
       'What PM parts/sub-assy are needed for this project?',
       'What are the PM quantities per system?',
@@ -139,7 +140,7 @@ export const nodes = [
     subtitle: 'Unified Reference',
     x: 1100,
     y: 275,
-    color: '#FFD60A',
+    owners: ['Engineering'],
     questions: [
       'What are all the discipline BOMs for this program?',
       'What part numbers reference each discipline BOM?',
@@ -159,7 +160,7 @@ export const nodes = [
     subtitle: 'Impact Resource Planner',
     x: 1400,
     y: 400,
-    color: '#E63946',
+    owners: ['Project Management', 'Material Management', 'Procurement'],
     questions: [
       'What is the full nested BOM for the program?',
       'What are ALL parts and sub-assemblies needed?',
@@ -184,7 +185,7 @@ export const nodes = [
     subtitle: 'Per-Vendor PRs',
     x: 1400,
     y: 275,
-    color: '#06D6A0',
+    owners: ['Project Management'],
     questions: [
       'What needs to be ordered from each vendor?',
       'What are the part details for procurement?',
@@ -205,7 +206,7 @@ export const nodes = [
     subtitle: 'Consolidated PR View',
     x: 1700,
     y: 275,
-    color: '#118AB2',
+    owners: ['Procurement'],
     questions: [
       'What is the status of all PRs?',
       'What has been ordered across all vendors?',
@@ -225,7 +226,7 @@ export const nodes = [
     subtitle: 'Receiving Team Interface',
     x: 1700,
     y: 400,
-    color: '#73D2DE',
+    owners: ['Ops'],
     questions: [
       'What items are expected to be received?',
       'What has been received and when?',
@@ -247,7 +248,7 @@ export const nodes = [
     subtitle: 'Purchasing Team',
     x: 1400,
     y: 150,
-    color: '#F4A261',
+    owners: ['Procurement'],
     questions: [
       'What PRs are pending approval?',
       'What quotes have been received?',
@@ -266,7 +267,7 @@ export const nodes = [
     subtitle: 'ERP System',
     x: 1400,
     y: 25,
-    color: '#8338EC',
+    owners: ['Procurement'],
     questions: [
       'What is the financial status of orders?',
       'What are the official purchase orders?',
@@ -284,7 +285,7 @@ export const nodes = [
     subtitle: 'Weekly Vendor Tracking',
     x: -100,
     y: 230,
-    color: '#E9C46A',
+    owners: ['Sub-Contracts Management'],
     questions: [
       'What line items does each vendor need to provide?',
       'When does each system need to ship?',
@@ -308,7 +309,7 @@ export const nodes = [
     subtitle: 'Individual Vendor View',
     x: -400,
     y: 120,
-    color: '#2A9D8F',
+    owners: ['Sub-Contracts Management'],
     questions: [
       'What is the shipping schedule for this vendor?',
       'Are we aligned with the vendor on dates?',
@@ -327,7 +328,7 @@ export const nodes = [
     subtitle: 'ADTA Team Communication',
     x: -400,
     y: 230,
-    color: '#2A9D8F',
+    owners: ['Project Management', 'Sub-Contracts Management'],
     questions: [
       'What date changes have occurred?',
       'What is the current schedule status?',
@@ -347,7 +348,7 @@ export const nodes = [
     subtitle: 'Truck Scheduling',
     x: -400,
     y: 340,
-    color: '#2A9D8F',
+    owners: ['Project Management', 'Sub-Contracts Management'],
     questions: [
       'What truck pickups need to be scheduled?',
       'When and where are pickups?',
@@ -367,7 +368,7 @@ export const nodes = [
     subtitle: 'Ship-Level Cost Rollup',
     x: 1100,
     y: 580,
-    color: '#F72585',
+    owners: ['Project Management', 'Procurement'],
     questions: [
       'What is the total cost per ship-level item?',
       'What is the cost breakdown of assemblies?',
@@ -388,7 +389,7 @@ export const nodes = [
     subtitle: 'As-Sold vs As-Built',
     x: 1100,
     y: 720,
-    color: '#7209B7',
+    owners: ['Project Management', 'Material Management', 'Procurement'],
     questions: [
       'What are the BOM differences between as-sold and as-built?',
       'What is the quantity delta per item?',
@@ -412,7 +413,7 @@ export const nodes = [
     subtitle: 'Tag Generation & Tracking',
     x: 200,
     y: 720,
-    color: '#4895EF',
+    owners: ['Project Management'],
     questions: [
       'What assets need to receive a tag?',
       'What are the specific line items per finger?',
@@ -435,7 +436,7 @@ export const nodes = [
     subtitle: 'Finger Packing Lists',
     x: -100,
     y: 580,
-    color: '#06D6A0',
+    owners: ['Project Management', 'Material Management'],
     questions: [
       'What ship-level materials are needed for each finger?',
       'What is the packing list for a specific finger?',
@@ -457,7 +458,7 @@ export const nodes = [
     subtitle: 'Per-Finger Packing List',
     x: -400,
     y: 580,
-    color: '#2A9D8F',
+    owners: ['Ops'],
     questions: [
       'What materials are needed for this finger?',
       'What are the top-level items?',
@@ -478,7 +479,7 @@ export const nodes = [
     subtitle: 'Assembly Release',
     x: 1100,
     y: 860,
-    color: '#F4A261',
+    owners: ['Ops'],
     questions: [
       'What work orders need to be released?',
       'What parts need to be picked for each work order?',
@@ -495,3 +496,13 @@ export const nodes = [
     icon: 'tracker',
   },
 ];
+
+// Export nodes with computed color from owners
+export const nodes = nodeData.map(node => ({
+  ...node,
+  color: getNodeFill(node.owners),
+  primaryColor: getPrimaryColor(node.owners),
+}));
+
+// Export owner colors for use in legend
+export { ownerColors } from './ownerConfig';
