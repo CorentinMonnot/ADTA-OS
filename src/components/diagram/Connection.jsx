@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Connection({ from, to, label, fromSide, toSide, nodes }) {
+export default function Connection({ from, to, label, fromSide, toSide, nodes, bidirectional }) {
   const fromNode = nodes.find(n => n.id === from);
   const toNode = nodes.find(n => n.id === to);
 
@@ -78,7 +78,7 @@ export default function Connection({ from, to, label, fromSide, toSide, nodes })
         strokeWidth="2"
         strokeDasharray={isManual ? "3 3" : "6 4"}
         style={{
-          animation: 'flowDash 1s linear infinite',
+          animation: bidirectional ? 'flowDashBidirectional 4s ease-in-out infinite' : 'flowDash 1s linear infinite',
         }}
       />
     </g>

@@ -391,7 +391,7 @@ const nodeData = [
     subtitle: 'As-Sold vs As-Built',
     x: 1100,
     y: 720,
-    owners: ['Project Management', 'Material Management', 'Procurement'],
+    owners: ['Project Management'],
     questions: [
       'What are the BOM differences between as-sold and as-built?',
       'What is the quantity delta per item?',

@@ -320,6 +320,14 @@ export default function AutomationOSDiagram() {
                 stroke-dashoffset: -10;
               }
             }
+            @keyframes flowDashBidirectional {
+              0%, 100% {
+                stroke-dashoffset: -20;
+              }
+              50% {
+                stroke-dashoffset: 20;
+              }
+            }
           `}
         </style>
 
@@ -358,6 +366,7 @@ export default function AutomationOSDiagram() {
               fromSide={conn.fromSide}
               toSide={conn.toSide}
               nodes={nodes}
+              bidirectional={conn.bidirectional}
             />
           ))}
 
@@ -373,10 +382,10 @@ export default function AutomationOSDiagram() {
         </g>
       </svg>
 
-      {/* Owner Legend - Top Right */}
+      {/* Legends - Bottom Right */}
       <div style={{
         position: 'absolute',
-        top: '20px',
+        bottom: '20px',
         right: '20px',
         background: 'rgba(13, 13, 26, 0.95)',
         border: '1px solid #3d3d5c',
@@ -385,73 +394,69 @@ export default function AutomationOSDiagram() {
         fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
         fontSize: '11px',
         zIndex: 20,
-      }}>
-        <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Owners</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {Object.entries(ownerColors).map(([owner, color]) => (
-            <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '2px',
-                backgroundColor: color,
-              }} />
-              <span style={{ color: '#aaa' }}>{owner}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Connection Type Legend - Bottom */}
-      <div style={{
-        position: 'absolute',
-        bottom: '0',
-        left: '0',
-        right: '0',
         display: 'flex',
-        justifyContent: 'center',
-        gap: '32px',
-        padding: '12px 20px',
-        background: 'rgba(13, 13, 26, 0.95)',
-        borderTop: '1px solid #3d3d5c',
-        fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
-        fontSize: '11px',
+        flexDirection: 'column',
+        gap: '16px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="2">
-            <line x1="0" y1="1" x2="24" y2="1" stroke="#06D6A0" strokeWidth="2" strokeDasharray="6 4" />
-          </svg>
-          <span style={{ color: '#06D6A0' }}>Power Query</span>
+        {/* Owners Legend */}
+        <div>
+          <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Stakeholders:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {Object.entries(ownerColors).map(([owner, color]) => (
+              <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '2px',
+                  backgroundColor: color,
+                }} />
+                <span style={{ color: '#aaa' }}>{owner}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="2">
-            <line x1="0" y1="1" x2="24" y2="1" stroke="#FF6B9D" strokeWidth="2" strokeDasharray="3 3" />
-          </svg>
-          <span style={{ color: '#FF6B9D' }}>Manual</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="2">
-            <line x1="0" y1="1" x2="24" y2="1" stroke="#FFD60A" strokeWidth="2" strokeDasharray="6 4" />
-          </svg>
-          <span style={{ color: '#FFD60A' }}>Reference</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="2">
-            <line x1="0" y1="1" x2="24" y2="1" stroke="#8888aa" strokeWidth="2" strokeDasharray="6 4" />
-          </svg>
-          <span style={{ color: '#8888aa' }}>VBA Generate</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="2">
-            <line x1="0" y1="1" x2="24" y2="1" stroke="#E63946" strokeWidth="2" strokeDasharray="6 4" />
-          </svg>
-          <span style={{ color: '#E63946' }}>Recursive Read</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="2">
-            <line x1="0" y1="1" x2="24" y2="1" stroke="#F4A261" strokeWidth="2" strokeDasharray="6 4" />
-          </svg>
-          <span style={{ color: '#F4A261' }}>Email + Quote</span>
+
+        {/* Link Type Legend */}
+        <div>
+          <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Link type:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="2">
+                <line x1="0" y1="1" x2="24" y2="1" stroke="#06D6A0" strokeWidth="2" strokeDasharray="6 4" />
+              </svg>
+              <span style={{ color: '#06D6A0' }}>Power Query</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="2">
+                <line x1="0" y1="1" x2="24" y2="1" stroke="#FF6B9D" strokeWidth="2" strokeDasharray="3 3" />
+              </svg>
+              <span style={{ color: '#FF6B9D' }}>Manual</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="2">
+                <line x1="0" y1="1" x2="24" y2="1" stroke="#FFD60A" strokeWidth="2" strokeDasharray="6 4" />
+              </svg>
+              <span style={{ color: '#FFD60A' }}>Reference</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="2">
+                <line x1="0" y1="1" x2="24" y2="1" stroke="#8888aa" strokeWidth="2" strokeDasharray="6 4" />
+              </svg>
+              <span style={{ color: '#8888aa' }}>VBA Generate</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="2">
+                <line x1="0" y1="1" x2="24" y2="1" stroke="#E63946" strokeWidth="2" strokeDasharray="6 4" />
+              </svg>
+              <span style={{ color: '#E63946' }}>Recursive Read</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="2">
+                <line x1="0" y1="1" x2="24" y2="1" stroke="#F4A261" strokeWidth="2" strokeDasharray="6 4" />
+              </svg>
+              <span style={{ color: '#F4A261' }}>Email + Quote</span>
+            </div>
+          </div>
         </div>
       </div>
 
