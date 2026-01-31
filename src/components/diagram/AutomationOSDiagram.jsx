@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, memo } from 'react';
 import { nodes, ownerColors } from './data/nodes';
 import { connections } from './data/connections';
 import { containers } from './data/containers';
@@ -8,6 +8,88 @@ import Container from './Container';
 import Node from './Node';
 import Connection from './Connection';
 import DetailPanel from './DetailPanel';
+
+// Memoized legend component to prevent re-renders when panel opens/closes
+const Legend = memo(function Legend() {
+  return (
+    <div style={{
+      position: 'absolute',
+      bottom: '20px',
+      right: '20px',
+      background: 'rgba(13, 13, 26, 0.95)',
+      border: '1px solid #3d3d5c',
+      borderRadius: '8px',
+      padding: '12px 16px',
+      fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
+      fontSize: '11px',
+      zIndex: 20,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px',
+    }}>
+      {/* Owners Legend */}
+      <div>
+        <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Stakeholders:</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {Object.entries(ownerColors).map(([owner, color]) => (
+            <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '2px',
+                backgroundColor: color,
+              }} />
+              <span style={{ color: '#aaa' }}>{owner}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Link Type Legend */}
+      <div>
+        <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Link type:</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#06D6A0" strokeWidth="2" strokeDasharray="6 4" />
+            </svg>
+            <span style={{ color: '#06D6A0' }}>Power Query</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#FF6B9D" strokeWidth="2" strokeDasharray="3 3" />
+            </svg>
+            <span style={{ color: '#FF6B9D' }}>Manual</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#FFD60A" strokeWidth="2" strokeDasharray="6 4" />
+            </svg>
+            <span style={{ color: '#FFD60A' }}>Reference</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#8888aa" strokeWidth="2" strokeDasharray="6 4" />
+            </svg>
+            <span style={{ color: '#8888aa' }}>VBA Generate</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#E63946" strokeWidth="2" strokeDasharray="6 4" />
+            </svg>
+            <span style={{ color: '#E63946' }}>Recursive Read</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#F4A261" strokeWidth="2" strokeDasharray="6 4" />
+            </svg>
+            <span style={{ color: '#F4A261' }}>Email + Quote</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 const INITIAL_ZOOM = 0.8;
 
@@ -383,82 +465,7 @@ export default function AutomationOSDiagram() {
       </svg>
 
       {/* Legends - Bottom Right */}
-      <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        right: '20px',
-        background: 'rgba(13, 13, 26, 0.95)',
-        border: '1px solid #3d3d5c',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
-        fontSize: '11px',
-        zIndex: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-      }}>
-        {/* Owners Legend */}
-        <div>
-          <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Stakeholders:</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {Object.entries(ownerColors).map(([owner, color]) => (
-              <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '2px',
-                  backgroundColor: color,
-                }} />
-                <span style={{ color: '#aaa' }}>{owner}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Link Type Legend */}
-        <div>
-          <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Link type:</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="2">
-                <line x1="0" y1="1" x2="24" y2="1" stroke="#06D6A0" strokeWidth="2" strokeDasharray="6 4" />
-              </svg>
-              <span style={{ color: '#06D6A0' }}>Power Query</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="2">
-                <line x1="0" y1="1" x2="24" y2="1" stroke="#FF6B9D" strokeWidth="2" strokeDasharray="3 3" />
-              </svg>
-              <span style={{ color: '#FF6B9D' }}>Manual</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="2">
-                <line x1="0" y1="1" x2="24" y2="1" stroke="#FFD60A" strokeWidth="2" strokeDasharray="6 4" />
-              </svg>
-              <span style={{ color: '#FFD60A' }}>Reference</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="2">
-                <line x1="0" y1="1" x2="24" y2="1" stroke="#8888aa" strokeWidth="2" strokeDasharray="6 4" />
-              </svg>
-              <span style={{ color: '#8888aa' }}>VBA Generate</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="2">
-                <line x1="0" y1="1" x2="24" y2="1" stroke="#E63946" strokeWidth="2" strokeDasharray="6 4" />
-              </svg>
-              <span style={{ color: '#E63946' }}>Recursive Read</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="2">
-                <line x1="0" y1="1" x2="24" y2="1" stroke="#F4A261" strokeWidth="2" strokeDasharray="6 4" />
-              </svg>
-              <span style={{ color: '#F4A261' }}>Email + Quote</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Legend />
 
       {/* Detail panel */}
       <DetailPanel

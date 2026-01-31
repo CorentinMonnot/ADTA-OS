@@ -199,21 +199,6 @@ export default function DetailPanel({ node, position, onClose }) {
       </div>
 
       {/* Scrollable content area */}
-      <style>{`
-        .detail-panel-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
-        .detail-panel-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .detail-panel-scroll::-webkit-scrollbar-thumb {
-          background: #3d3d5c;
-          border-radius: 3px;
-        }
-        .detail-panel-scroll::-webkit-scrollbar-thumb:hover {
-          background: #4d4d6c;
-        }
-      `}</style>
       <div
         className="detail-panel-scroll"
         style={{

@@ -111,8 +111,9 @@ export default function Node({ node, isSelected, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Available width for text (card is 220px, icon area takes ~55px, plus padding)
-  // Using slightly smaller width than clip area to account for canvas vs SVG measurement differences
-  const textAreaWidth = 148;
+  // Using smaller width than clip area to account for canvas vs SVG measurement differences
+  // The clip area is 160px, so 140px gives a 20px safety buffer
+  const textAreaWidth = 140;
   const labelFont = '600 14px "JetBrains Mono", "SF Mono", monospace';
   const labelFontSmall = '600 13px "JetBrains Mono", "SF Mono", monospace';
   const subtitleFont = '11px "JetBrains Mono", "SF Mono", monospace';
@@ -230,7 +231,7 @@ export default function Node({ node, isSelected, onClick }) {
       {/* Clip path for text area */}
       <defs>
         <clipPath id={clipId}>
-          <rect x="-55" y="-35" width="158" height="70" />
+          <rect x="-55" y="-35" width="162" height="70" />
         </clipPath>
       </defs>
 
