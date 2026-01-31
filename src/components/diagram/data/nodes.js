@@ -12,13 +12,12 @@ const nodeData = [
     y: 580,
     owners: ['Engineering'],
     questions: [
-      'What sub-assemblies make up each product?',
-      'What is the SE/ME/EE/PM configuration?',
-      'How many units of each part are allocated?',
+      'What sub-assemblies and parts make up each finger?',
+      'How many units of each are allocated to a specific system?',
     ],
     details: {
       disciplines: ['Systems (SE)', 'Mechanical (ME)', 'Electrical (EE)', 'Program (PM)'],
-      capacity: 'Up to 100 products per matrix',
+      capacity: 'Up to 100 fingers per matrix',
       structure: 'Tabs per discipline • Rows = parts/sub-assy • Columns = systems',
       role: 'Engineers allocate ship-level sub-assemblies and parts to define shippable products',
     },
@@ -32,9 +31,12 @@ const nodeData = [
     y: 120,
     owners: ['Project Management'],
     questions: [
+      'What is the site job code?',
       'What is the system code?',
+      'What is the finger unique ID?',
       'Where does it ship to?',
       'When is installation scheduled?',
+      'What is the install start change history?',
     ],
     details: {
       content: ['System Code', 'Ship-to Address', 'Installation Date'],
@@ -57,8 +59,8 @@ const nodeData = [
       source: 'Extracts from Configuration Matrix',
       structure: 'Tab per discipline (SE, ME, EE, PM)',
       content: 'Ship-level sub-assemblies and parts, aggregated',
-      process: 'Flattens multi-tab discipline structure into single output',
-      role: 'Transforms matrix format into usable flat data for downstream consumption',
+      process: 'Flattens multi-tab discipline structure into single output or broken down by discipline',
+      role: 'Transforms matrix format into usable data for downstream consumption',
     },
     icon: 'transform',
   },
@@ -70,8 +72,8 @@ const nodeData = [
     y: 140,
     owners: ['Engineering'],
     questions: [
-      'What SE parts/sub-assy are needed for this project?',
-      'What are the SE quantities per system?',
+      'What SE parts/sub-assy are needed for the program?',
+      'What are the SE quantities for the program?',
     ],
     details: {
       discipline: 'Systems Engineering (SE)',
@@ -88,8 +90,8 @@ const nodeData = [
     y: 230,
     owners: ['Engineering'],
     questions: [
-      'What ME parts/sub-assy are needed for this project?',
-      'What are the ME quantities per system?',
+      'What ME parts/sub-assy are needed for the program?',
+      'What are the ME quantities for the program?',
     ],
     details: {
       discipline: 'Mechanical Engineering (ME)',
@@ -106,8 +108,8 @@ const nodeData = [
     y: 320,
     owners: ['Engineering'],
     questions: [
-      'What EE parts/sub-assy are needed for this project?',
-      'What are the EE quantities per system?',
+      'What EE parts/sub-assy are needed for the program?',
+      'What are the EE quantities for the program?',
     ],
     details: {
       discipline: 'Electrical Engineering (EE)',
@@ -118,14 +120,14 @@ const nodeData = [
   },
   {
     id: 'config-bom-pm',
-    label: 'Config BOM - PM',
+    label: 'Config BOM - DOCS',
     subtitle: 'Program Management',
     x: 800,
     y: 410,
     owners: ['Engineering'],
     questions: [
-      'What PM parts/sub-assy are needed for this project?',
-      'What are the PM quantities per system?',
+      'What PM parts/sub-assy are needed for the program?',
+      'What are the PM quantities for the program?',
     ],
     details: {
       discipline: 'Program Management (PM)',
@@ -143,12 +145,12 @@ const nodeData = [
     owners: ['Engineering'],
     questions: [
       'What are all the discipline BOMs for this program?',
-      'What part numbers reference each discipline BOM?',
+      'What part number / revision reference each discipline BOM?',
       'What is the complete program structure?',
     ],
     details: {
       structure: 'Same format as discipline BOMs',
-      content: 'References to discipline BOMs by part number',
+      content: 'References to discipline BOMs by part number and revision',
       role: 'Unified view linking all 4 discipline configurations',
       note: 'Contains references, not actual components',
     },
@@ -163,9 +165,12 @@ const nodeData = [
     owners: ['Project Management', 'Material Management', 'Procurement'],
     questions: [
       'What is the full nested BOM for the program?',
-      'What are ALL parts and sub-assemblies needed?',
+      "What needs to be purchased, made or CFE'd?",
       'What does the flat BOM look like for procurement?',
-      'What diff reqs are needed to reconcile counts?',
+      'Did we buy everything?',
+      'Did we receive everything?',
+      'What is the vendor for this item and can it be substitued?',
+      'How much did we spend with vendor X?',
     ],
     details: {
       technology: 'VBA-powered Excel workbook',
@@ -187,9 +192,9 @@ const nodeData = [
     y: 275,
     owners: ['Project Management'],
     questions: [
-      'What needs to be ordered from each vendor?',
+      'What needs to be ordered from this vendor?',
       'What are the part details for procurement?',
-      'What is the pricing and delivery info?',
+      'What is the pricing, delivery and need-by date?',
     ],
     details: {
       format: 'Excel workbook (1 per vendor)',
@@ -214,7 +219,7 @@ const nodeData = [
     ],
     details: {
       format: 'Excel workbook',
-      source: 'Reads all applicable PRs via Power Query',
+      source: 'Reads all applicable PRs from DOC-IA via Power Query recursion',
       output: 'Single unified table of all procurement data',
       role: 'Centralized visibility into all purchase requisitions',
     },
@@ -228,9 +233,10 @@ const nodeData = [
     y: 400,
     owners: ['Ops'],
     questions: [
-      'What items are expected to be received?',
+      'What items are expected to be received and when?',
       'What has been received and when?',
       'Where was each item received to?',
+      'When was the inbound QC Check performed?',
     ],
     details: {
       format: 'Excel workbook',
@@ -250,13 +256,10 @@ const nodeData = [
     y: 150,
     owners: ['Procurement'],
     questions: [
-      'What PRs are pending approval?',
-      'What quotes have been received?',
-      'What orders need to be placed?',
     ],
     details: {
       receives: 'PR + Quote via email',
-      role: 'Reviews and processes purchase requisitions',
+      role: 'Processes purchase requisitions and acknowledgements',
       action: 'Places orders with vendors',
     },
     icon: 'team',
@@ -287,9 +290,11 @@ const nodeData = [
     y: 230,
     owners: ['Sub-Contracts Management'],
     questions: [
-      'What line items does each vendor need to provide?',
+      'What line items does critical vendors need to provide?',
       'When does each system need to ship?',
+      'How long is is going to take to ship from the vendor to site?',
       'What is the status update from each vendor?',
+      'Are we aligned with the vendor on dates?',
       'What are the weekly meeting notes?',
     ],
     details: {
@@ -311,9 +316,8 @@ const nodeData = [
     y: 120,
     owners: ['Sub-Contracts Management'],
     questions: [
-      'What is the shipping schedule for this vendor?',
-      'Are we aligned with the vendor on dates?',
-      'What items ship when?',
+      'What does Impact Expect the vendor to ship?',
+      'When is Impact picking up from the vendor?',
     ],
     details: {
       format: 'Excel report (VBA generated)',
@@ -328,16 +332,16 @@ const nodeData = [
     subtitle: 'ADTA Team Communication',
     x: -400,
     y: 230,
-    owners: ['Project Management', 'Sub-Contracts Management'],
+    owners: ['Project Management'],
     questions: [
       'What date changes have occurred?',
-      'What is the current schedule status?',
+      'What is the current phase for a particular finger? (pre-ship, install, support, complete)',
       'What does the team need to know?',
     ],
     details: {
       format: 'Excel report (VBA generated)',
       purpose: 'Internal communication of date changes',
-      updates: 'Ad-hoc for every change',
+      updates: 'Ad-hoc for every change, sent by the PM',
       audience: 'Internal - whole ADTA team',
     },
     icon: 'doc',
@@ -370,9 +374,7 @@ const nodeData = [
     y: 580,
     owners: ['Project Management', 'Procurement'],
     questions: [
-      'What is the total cost per ship-level item?',
-      'What is the cost breakdown of assemblies?',
-      'What is the avg price per individual part?',
+      'What is the total cost per ship-level item, including CFE?',
     ],
     details: {
       format: 'Excel workbook',
@@ -415,9 +417,8 @@ const nodeData = [
     y: 720,
     owners: ['Project Management'],
     questions: [
-      'What assets need to receive a tag?',
-      'What are the specific line items per finger?',
-      'What notes/inputs have been added?',
+      'What assets need to receive a tag according to AMZL rules?',
+      'What specific assets tags are needed per finger?',
       'What tags need to be ordered from the print shop?',
     ],
     details: {
@@ -439,8 +440,6 @@ const nodeData = [
     owners: ['Project Management', 'Material Management'],
     questions: [
       'What ship-level materials are needed for each finger?',
-      'What is the packing list for a specific finger?',
-      'What materials need to be staged?',
     ],
     details: {
       format: 'Excel workbook with VBA',
@@ -463,6 +462,7 @@ const nodeData = [
       'What materials are needed for this finger?',
       'What are the top-level items?',
       'What electrical/mechanical/documentation is required?',
+      'Did everything needed for the finger install arrive at site?',
     ],
     details: {
       format: 'Excel workbook (VBA generated)',
@@ -481,14 +481,13 @@ const nodeData = [
     y: 860,
     owners: ['Ops'],
     questions: [
-      'What work orders need to be released?',
-      'What parts need to be picked for each work order?',
-      'What assemblies are required?',
+      'How many assemblies are expected to be complete for this work order?',
+      'What parts need to be picked for this work order?',
     ],
     details: {
       format: 'Excel workbook',
       sources: ['Configuration Matrix', 'IRP'],
-      process: 'Combines ship-level item counts with IRP BOM explosion',
+      process: 'Combines ship-level item counts with IRP BOM explosion for picking',
       output: 'Work orders with associated pick lists',
       usage: 'Release work orders and coordinate parts picking',
       role: 'Production planning and shop floor coordination',
