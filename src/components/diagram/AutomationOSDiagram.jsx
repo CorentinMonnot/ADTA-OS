@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { nodes } from './data/nodes';
 import { connections } from './data/connections';
 import { containers } from './data/containers';
@@ -15,6 +15,7 @@ export default function AutomationOSDiagram() {
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+  const lastTouchDistance = useRef(null);
 
   const handleNodeClick = useCallback((nodeId) => {
     setSelectedNode(prev => prev === nodeId ? null : nodeId);
@@ -62,6 +63,45 @@ export default function AutomationOSDiagram() {
     setPan(defaultPan);
     setZoom(1);
   }, [defaultPan]);
+
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length === 1) {
+      setIsPanning(true);
+      setStartPan({
+        x: e.touches[0].clientX - pan.x,
+        y: e.touches[0].clientY - pan.y
+      });
+    } else if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      lastTouchDistance.current = distance;
+    }
+  }, [pan]);
+
+  const handleTouchMove = useCallback((e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isPanning) {
+      setPan({
+        x: e.touches[0].clientX - startPan.x,
+        y: e.touches[0].clientY - startPan.y
+      });
+    } else if (e.touches.length === 2 && lastTouchDistance.current) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const delta = (distance - lastTouchDistance.current) * 0.01;
+      setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 3));
+      lastTouchDistance.current = distance;
+    }
+  }, [isPanning, startPan]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsPanning(false);
+    lastTouchDistance.current = null;
+  }, []);
 
   const selectedNodeData = nodes.find(n => n.id === selectedNode);
 
@@ -122,7 +162,7 @@ export default function AutomationOSDiagram() {
           color: '#666',
           marginTop: '8px',
         }}>
-          Click on a node to view details • Drag to pan • Scroll to zoom
+          Click or tap a node to view details • Drag to pan • Scroll or pinch to zoom
         </div>
       </div>
 
@@ -209,13 +249,17 @@ export default function AutomationOSDiagram() {
           position: 'absolute',
           top: 0,
           left: 0,
-          cursor: isPanning ? 'grabbing' : 'grab'
+          cursor: isPanning ? 'grabbing' : 'grab',
+          touchAction: 'none'
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <style>
           {`
