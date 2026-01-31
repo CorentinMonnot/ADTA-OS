@@ -16,6 +16,8 @@ export default function AutomationOSDiagram() {
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const lastTouchDistance = useRef(null);
+  const lastPinchCenter = useRef(null);
+  const svgRef = useRef(null);
 
   const handleNodeClick = useCallback((nodeId) => {
     setSelectedNode(prev => prev === nodeId ? null : nodeId);
@@ -47,9 +49,21 @@ export default function AutomationOSDiagram() {
 
   const handleWheel = useCallback((e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 3));
-  }, []);
+    const rect = svgRef.current.getBoundingClientRect();
+    const pointerX = e.clientX - rect.left;
+    const pointerY = e.clientY - rect.top;
+
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.min(Math.max(zoom * zoomFactor, 0.3), 3);
+    const scale = newZoom / zoom;
+
+    // Adjust pan so the point under the cursor stays in place
+    const newPanX = pointerX - (pointerX - pan.x) * scale;
+    const newPanY = pointerY - (pointerY - pan.y) * scale;
+
+    setPan({ x: newPanX, y: newPanY });
+    setZoom(newZoom);
+  }, [zoom, pan]);
 
   const handleZoomIn = useCallback(() => {
     setZoom(prev => Math.min(prev + 0.2, 3));
@@ -72,11 +86,17 @@ export default function AutomationOSDiagram() {
         y: e.touches[0].clientY - pan.y
       });
     } else if (e.touches.length === 2) {
+      const rect = svgRef.current.getBoundingClientRect();
       const distance = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
       lastTouchDistance.current = distance;
+      // Store the pinch center relative to the SVG
+      lastPinchCenter.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top
+      };
     }
   }, [pan]);
 
@@ -87,20 +107,37 @@ export default function AutomationOSDiagram() {
         x: e.touches[0].clientX - startPan.x,
         y: e.touches[0].clientY - startPan.y
       });
-    } else if (e.touches.length === 2 && lastTouchDistance.current) {
+    } else if (e.touches.length === 2 && lastTouchDistance.current && lastPinchCenter.current) {
+      const rect = svgRef.current.getBoundingClientRect();
       const distance = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
-      const delta = (distance - lastTouchDistance.current) * 0.01;
-      setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 3));
+
+      // Calculate the current pinch center
+      const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+      // Calculate the zoom scale
+      const scale = distance / lastTouchDistance.current;
+      const newZoom = Math.min(Math.max(zoom * scale, 0.3), 3);
+      const actualScale = newZoom / zoom;
+
+      // Adjust pan so the pinch center stays in place, and account for finger movement
+      const newPanX = centerX - (lastPinchCenter.current.x - pan.x) * actualScale;
+      const newPanY = centerY - (lastPinchCenter.current.y - pan.y) * actualScale;
+
+      setPan({ x: newPanX, y: newPanY });
+      setZoom(newZoom);
       lastTouchDistance.current = distance;
+      lastPinchCenter.current = { x: centerX, y: centerY };
     }
-  }, [isPanning, startPan]);
+  }, [isPanning, startPan, zoom, pan]);
 
   const handleTouchEnd = useCallback(() => {
     setIsPanning(false);
     lastTouchDistance.current = null;
+    lastPinchCenter.current = null;
   }, []);
 
   const selectedNodeData = nodes.find(n => n.id === selectedNode);
@@ -243,6 +280,7 @@ export default function AutomationOSDiagram() {
 
       {/* Main diagram */}
       <svg
+        ref={svgRef}
         width="100%"
         height="100%"
         style={{
