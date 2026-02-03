@@ -76,7 +76,7 @@ export default function Connection({ from, to, label, fromSide, toSide, nodes, b
         fill="none"
         stroke={strokeColor}
         strokeWidth="2"
-        strokeDasharray={isManual ? "3 3" : "6 4"}
+        strokeDasharray="6 4"
         style={{
           animation: bidirectional ? 'flowDashBidirectional 4s ease-in-out infinite' : 'flowDash 1s linear infinite',
         }}

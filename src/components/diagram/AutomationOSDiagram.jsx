@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useMemo, memo } from 'react';
 import { nodes, ownerColors } from './data/nodes';
 import { connections } from './data/connections';
 import { containers } from './data/containers';
-import { getDefaultPan } from './utils';
+import { getFitToViewport } from './utils';
 import { getGradientId, getUniqueOwnerCombinations } from './data/ownerConfig';
 import Container from './Container';
 import Node from './Node';
@@ -14,76 +14,82 @@ const Legend = memo(function Legend() {
   return (
     <div style={{
       position: 'absolute',
-      bottom: '20px',
+      top: '20px',
       right: '20px',
+      height: '72px',
       background: 'rgba(13, 13, 26, 0.95)',
       border: '1px solid #3d3d5c',
       borderRadius: '8px',
-      padding: '12px 16px',
+      padding: '10px 24px',
       fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
-      fontSize: '11px',
+      fontSize: '10px',
       zIndex: 20,
       display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
+      flexDirection: 'row',
+      gap: '32px',
+      alignItems: 'flex-start',
+      boxSizing: 'border-box',
     }}>
       {/* Owners Legend */}
-      <div>
-        <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Stakeholders:</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ color: '#ffffff', marginBottom: '6px', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px' }}>Stakeholders:</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, auto)', gap: '4px 20px', flex: 1 }}>
           {Object.entries(ownerColors).map(([owner, color]) => (
-            <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div key={owner} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{
-                width: '12px',
-                height: '12px',
+                width: '8px',
+                height: '8px',
                 borderRadius: '2px',
                 backgroundColor: color,
               }} />
-              <span style={{ color: '#aaa' }}>{owner}</span>
+              <span style={{ color: '#aaa', fontSize: '9px' }}>{owner}</span>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Vertical Separator */}
+      <div style={{ width: '1px', height: '100%', backgroundColor: '#3d3d5c' }} />
+
       {/* Link Type Legend */}
-      <div>
-        <div style={{ color: '#666', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Link type:</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="2">
-              <line x1="0" y1="1" x2="24" y2="1" stroke="#06D6A0" strokeWidth="2" strokeDasharray="6 4" />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ color: '#ffffff', marginBottom: '6px', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px' }}>Link type:</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, auto)', gap: '4px 20px', flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="16" height="2">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#06D6A0" strokeWidth="2" strokeDasharray="4 2" />
             </svg>
-            <span style={{ color: '#06D6A0' }}>Power Query</span>
+            <span style={{ color: '#06D6A0', fontSize: '9px' }}>Power Query</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="2">
-              <line x1="0" y1="1" x2="24" y2="1" stroke="#FF6B9D" strokeWidth="2" strokeDasharray="3 3" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="16" height="2">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#FF6B9D" strokeWidth="2" strokeDasharray="4 2" />
             </svg>
-            <span style={{ color: '#FF6B9D' }}>Manual</span>
+            <span style={{ color: '#FF6B9D', fontSize: '9px' }}>Manual</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="2">
-              <line x1="0" y1="1" x2="24" y2="1" stroke="#FFD60A" strokeWidth="2" strokeDasharray="6 4" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="16" height="2">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#FFD60A" strokeWidth="2" strokeDasharray="4 2" />
             </svg>
-            <span style={{ color: '#FFD60A' }}>Reference</span>
+            <span style={{ color: '#FFD60A', fontSize: '9px' }}>Reference</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="2">
-              <line x1="0" y1="1" x2="24" y2="1" stroke="#8888aa" strokeWidth="2" strokeDasharray="6 4" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="16" height="2">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#8888aa" strokeWidth="2" strokeDasharray="4 2" />
             </svg>
-            <span style={{ color: '#8888aa' }}>VBA Generate</span>
+            <span style={{ color: '#8888aa', fontSize: '9px' }}>VBA Generate</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="2">
-              <line x1="0" y1="1" x2="24" y2="1" stroke="#E63946" strokeWidth="2" strokeDasharray="6 4" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="16" height="2">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#E63946" strokeWidth="2" strokeDasharray="4 2" />
             </svg>
-            <span style={{ color: '#E63946' }}>Recursive Read</span>
+            <span style={{ color: '#E63946', fontSize: '9px' }}>Recursive Read</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="2">
-              <line x1="0" y1="1" x2="24" y2="1" stroke="#F4A261" strokeWidth="2" strokeDasharray="6 4" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="16" height="2">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#F4A261" strokeWidth="2" strokeDasharray="4 2" />
             </svg>
-            <span style={{ color: '#F4A261' }}>Email + Quote</span>
+            <span style={{ color: '#F4A261', fontSize: '9px' }}>Email + Quote</span>
           </div>
         </div>
       </div>
@@ -91,13 +97,16 @@ const Legend = memo(function Legend() {
   );
 });
 
-const INITIAL_ZOOM = 0.8;
-
 export default function AutomationOSDiagram() {
   const [selectedNode, setSelectedNode] = useState(null);
-  const defaultPan = getDefaultPan(nodes, INITIAL_ZOOM);
-  const [pan, setPan] = useState(defaultPan);
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+
+  // Calculate initial view to fit all content in viewport
+  const [initialView] = useState(() =>
+    getFitToViewport(nodes, window.innerWidth, window.innerHeight)
+  );
+
+  const [pan, setPan] = useState(initialView.pan);
+  const [zoom, setZoom] = useState(initialView.zoom);
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const lastTouchDistance = useRef(null);
@@ -159,9 +168,14 @@ export default function AutomationOSDiagram() {
   }, []);
 
   const handleResetView = useCallback(() => {
-    setPan(defaultPan);
-    setZoom(INITIAL_ZOOM);
-  }, [defaultPan]);
+    const { zoom: newZoom, pan: newPan } = getFitToViewport(
+      nodes,
+      window.innerWidth,
+      window.innerHeight
+    );
+    setPan(newPan);
+    setZoom(newZoom);
+  }, []);
 
   const handleTouchStart = useCallback((e) => {
     if (e.touches.length === 1) {
